@@ -13,7 +13,7 @@ class AuthController extends GetxController {
   final RxString religion = ''.obs;
 
   final String apiBaseUrl =
-      'http://192.168.100.169/api/api.php'; // Ganti dengan URL API Anda
+      'http://192.168.100.169/api/api.php'; // Ganti dengan IP URL API Anda
 
   Future<void> login(String username, String password) async {
     final response = await http.post(
