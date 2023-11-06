@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class AuthController extends GetxController {
   final RxBool isLoggedIn = false.obs;
@@ -10,15 +12,33 @@ class AuthController extends GetxController {
   final RxString gender = ''.obs;
   final RxString religion = ''.obs;
 
-  void login(String username, String password) async {
-    // Disini tambahkan logika login sesuai dengan data yang telah diregistrasikan
-    // Misalnya, Anda dapat memeriksa username dan password dengan data yang disimpan.
-    if (username == "username" && password == "password") {
-      final prefs = await SharedPreferences.getInstance();
-      prefs.setString("username", username);
-      final storedUsername = prefs.getString("username");
-      isLoggedIn.value = true;
-      this.username.value = storedUsername ?? '';
+  final String apiBaseUrl =
+      'http://192.168.100.169/api/api.php'; // Ganti dengan URL API Anda
+
+  Future<void> login(String username, String password) async {
+    final response = await http.post(
+      Uri.parse(apiBaseUrl),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'action': 'login',
+        'username': username,
+        'password': password,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data = jsonDecode(response.body);
+      if (data['success'] == true) {
+        final prefs = await SharedPreferences.getInstance();
+        prefs.setString("username", username);
+        final storedUsername = prefs.getString("username");
+        isLoggedIn.value = true;
+        this.username.value = storedUsername ?? '';
+      } else {
+        // Handle login error
+      }
+    } else {
+      // Handle HTTP error
     }
   }
 

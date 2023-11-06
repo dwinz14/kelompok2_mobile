@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'auth_controller.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class RegistrationPage extends StatefulWidget {
   @override
@@ -18,6 +21,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
   String selectedGender = "Laki-Laki";
   String selectedReligion = "Islam";
   DateTime selectedDate = DateTime.now();
+  final AuthController authController = Get.find();
 
   void _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -32,23 +36,40 @@ class _RegistrationPageState extends State<RegistrationPage> {
       });
   }
 
-  void register() async {
+  Future<void> register() async {
     final username = usernameController.text;
     final fullName = fullNameController.text;
     final email = emailController.text;
     final password = passwordController.text;
 
-    // Simpan data pengguna ke Shared Preferences
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setString("username", username);
-    prefs.setString("fullName", fullName);
-    prefs.setString("email", email);
-    prefs.setString("password", password);
-    prefs.setString("gender", selectedGender);
-    prefs.setString("religion", selectedReligion);
-    prefs.setString("dateOfBirth", selectedDate.toString());
+    final response = await http.post(
+      Uri.parse(authController.apiBaseUrl),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'action': 'register',
+        'username': username,
+        'password': password,
+        'fullName': fullName,
+        'email': email,
+        'dateOfBirth': selectedDate.toLocal().toString().split(' ')[0],
+        'gender': selectedGender,
+        'religion': selectedReligion,
+      }),
+    );
 
-    Get.toNamed('/login');
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data = jsonDecode(response.body);
+      if (data['success'] == true) {
+        Get.toNamed('/login');
+      } else {
+        Get.snackbar("Error", data['message'],
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.red,
+            colorText: Colors.white);
+      }
+    } else {
+      // Handle HTTP error
+    }
   }
 
   @override

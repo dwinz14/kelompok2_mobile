@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
 
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Your App Name',
+      title: 'APLIKASI INVENTORY',
       initialRoute: '/login',
       getPages: [
         GetPage(name: '/login', page: () => LoginPage()),

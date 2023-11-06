@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'auth_controller.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class LoginPage extends StatefulWidget {
   @override
@@ -10,23 +13,34 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final AuthController authController = Get.find();
 
   Future<void> login() async {
     final username = usernameController.text;
     final password = passwordController.text;
 
-    // Baca data pengguna dari Shared Preferences
-    final prefs = await SharedPreferences.getInstance();
-    final storedUsername = prefs.getString("username");
-    final storedPassword = prefs.getString("password");
+    final response = await http.post(
+      Uri.parse(authController.apiBaseUrl),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'action': 'login',
+        'username': username,
+        'password': password,
+      }),
+    );
 
-    if (username == storedUsername && password == storedPassword) {
-      Get.toNamed('/dashboard');
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data = jsonDecode(response.body);
+      if (data['success'] == true) {
+        Get.toNamed('/dashboard');
+      } else {
+        Get.snackbar("Error", data['message'],
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.red,
+            colorText: Colors.white);
+      }
     } else {
-      Get.snackbar("Error", "Invalid username or password",
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white);
+      // Handle HTTP error
     }
   }
 

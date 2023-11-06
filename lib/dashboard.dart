@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'auth_controller.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -9,25 +8,7 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-  Future<SharedPreferences> prefs = SharedPreferences.getInstance();
-  String? username, fullName, email, dateOfBirth, gender, religion;
-
-  void fetchData() async {
-    final prefs = await SharedPreferences.getInstance();
-    username = prefs.getString("username");
-    fullName = prefs.getString("fullName");
-    email = prefs.getString("email");
-    dateOfBirth = prefs.getString("dateOfBirth");
-    gender = prefs.getString("gender");
-    religion = prefs.getString("religion");
-    setState(() {});
-  }
-
-  @override
-  void initState() {
-    fetchData();
-    super.initState();
-  }
+  final AuthController authController = Get.find();
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +24,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 content: Text("Are you sure you want to logout?"),
                 textConfirm: "Logout",
                 onConfirm: () {
-                  Get.find<AuthController>().logout();
+                  authController.logout();
                   Get.offAllNamed('/login');
                 },
                 textCancel: "Cancel",
@@ -54,26 +35,18 @@ class _DashboardPageState extends State<DashboardPage> {
         ],
       ),
       body: Center(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              Text(
-                "Welcome, $fullName!",
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.blue,
-                ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              "Welcome to Your Dashboard",
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.blue,
               ),
-              SizedBox(height: 20),
-              Text("Username: $username"),
-              Text("Email: $email"),
-              Text("Date of Birth: $dateOfBirth"),
-              Text("Gender: $gender"),
-              Text("Religion: $religion"),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
