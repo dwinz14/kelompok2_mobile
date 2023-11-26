@@ -4,6 +4,8 @@ import 'login_page.dart';
 import 'registration_page.dart';
 import 'dashboard.dart';
 import 'auth_controller.dart';
+import 'profil.dart';
+import 'transaksi.dart';
 
 void main() {
   runApp(MyApp());
@@ -22,6 +24,8 @@ class MyApp extends StatelessWidget {
         GetPage(name: '/login', page: () => LoginPage()),
         GetPage(name: '/registration', page: () => RegistrationPage()),
         GetPage(name: '/dashboard', page: () => DashboardPage()),
+        GetPage(name: '/profil', page: () => ProfilPage()),
+        GetPage(name: '/transaksi', page: () => TransaksiPage()),
       ],
     );
   }

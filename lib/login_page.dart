@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'auth_controller.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 
 class LoginPage extends StatefulWidget {
   @override
@@ -19,87 +16,97 @@ class _LoginPageState extends State<LoginPage> {
     final username = usernameController.text;
     final password = passwordController.text;
 
-    final response = await http.post(
-      Uri.parse(authController.apiBaseUrl),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'action': 'login',
-        'username': username,
-        'password': password,
-      }),
-    );
+    await authController.login(username, password);
 
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> data = jsonDecode(response.body);
-      if (data['success'] == true) {
-        Get.toNamed('/dashboard');
-      } else {
-        Get.snackbar("Error", data['message'],
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.red,
-            colorText: Colors.white);
-      }
+    if (authController.isLoggedIn.value) {
+      Get.offAllNamed('/dashboard');
     } else {
-      // Handle HTTP error
+      Get.snackbar(
+        "Error",
+        "Invalid username or password",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              Text(
-                "Login",
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.blue,
+      body: Container(
+        padding: EdgeInsets.all(20.0),
+        decoration: BoxDecoration(
+          color: Colors.white,
+        ),
+        child: Center(
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "Sistem Inventory",
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
                 ),
-              ),
-              SizedBox(height: 20),
-              TextFormField(
-                controller: usernameController,
-                decoration: InputDecoration(
-                  labelText: 'Username',
-                  border: OutlineInputBorder(),
+                SizedBox(height: 50),
+                Image.asset(
+                  'assets/images/logo.png',
+                  height: 200,
                 ),
-              ),
-              SizedBox(height: 20),
-              TextFormField(
-                controller: passwordController,
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  border: OutlineInputBorder(),
+                SizedBox(height: 20),
+                TextField(
+                  controller: usernameController,
+                  decoration: InputDecoration(
+                    labelText: 'Username',
+                    prefixIcon: Icon(Icons.person),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                  ),
                 ),
-                obscureText: true,
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: login,
-                child: Text(
-                  'Login',
-                  style: TextStyle(color: Colors.white),
+                SizedBox(height: 16),
+                TextField(
+                  controller: passwordController,
+                  decoration: InputDecoration(
+                    labelText: 'Password',
+                    prefixIcon: Icon(Icons.lock),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                  ),
+                  obscureText: true,
                 ),
-                style: ElevatedButton.styleFrom(
-                  primary: Colors.blue,
-                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: login,
+                  child: Text(
+                    'Login',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.blue,
+                    padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                  ),
                 ),
-              ),
-              SizedBox(height: 20),
-              TextButton(
-                onPressed: () {
-                  Get.toNamed('/registration');
-                },
-                child: Text(
-                  "Create an Account",
-                  style: TextStyle(color: Colors.blue),
+                SizedBox(height: 16),
+                TextButton(
+                  onPressed: () {
+                    Get.toNamed('/registration');
+                  },
+                  child: Text(
+                    "Create an Account",
+                    style: TextStyle(color: Colors.blue),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
